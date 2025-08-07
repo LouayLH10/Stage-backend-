@@ -14,6 +14,7 @@ return [
     | and production domains which access your API via a frontend SPA.
     |
     */
+'guard' => ['sanctum'],
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',

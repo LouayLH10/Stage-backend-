@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'num_tel',
+        'pages'
     ];
 
     /**
@@ -40,5 +42,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'pages' => 'array', // important pour convertir automatiquement le champ JSON en array PHP
     ];
+    public function projets()
+{
+    return $this->hasMany(Project::class);
+}
+
 }

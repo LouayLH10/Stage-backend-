@@ -87,6 +87,7 @@ public function user(Request $request)
         if (!$user) {
             return response()->json([
                 'success' => false,
+                
                 'message' => 'Non authentifié - Aucun utilisateur connecté'
             ], 401);
         }
@@ -108,6 +109,7 @@ public function user(Request $request)
         
         return response()->json([
             'success' => false,
+            
             'message' => 'Erreur lors de la récupération du profil utilisateur',
             'error' => env('APP_DEBUG') ? $e->getMessage() : null // Ne montre l'erreur qu'en mode debug
         ], 500);
