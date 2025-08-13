@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Appartement;
+
 class AppartementController extends Controller
 {
     public function addappartement(Request $request){
@@ -15,10 +16,8 @@ class AppartementController extends Controller
                 'etage' => 'required|integer',
                 'superfice' => 'required|numeric',
                 'prix' => 'required|numeric',
-                'plan' => 'file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:10240', // jusqu'à 10 Mo
+                'plan' => 'file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:10240', // up to 10 MB
                 'project_id' => 'required|exists:projects,id',
-
-
             ]);
 
             if ($validator->fails()) {
@@ -29,14 +28,13 @@ class AppartementController extends Controller
                 ], 422);
             }
 
-            // 📦 Upload fichiers
-$planPath = null;
+            // 📦 File upload
+            $planPath = null;
+            if ($request->hasFile('plan')) {
+                $planPath = $request->file('plan')->store('appartements/plans', 'public');
+            }      
 
-if ($request->hasFile('plan')) {
-    $planPath = $request->file('plan')->store('appartements/plans', 'public');
-}      
-
-            // 🧱 Création du projet
+            // 🧱 Create the apartment
             $project = Appartement::create([
                 "etage"=>$request->etage,
                 "superfice"=>$request->superfice,
@@ -49,47 +47,59 @@ if ($request->hasFile('plan')) {
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Projet ajouté avec succès',
+                'message' => 'Apartment added successfully',
                 'project' => $project
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Erreur serveur',
+                'message' => 'Server error',
                 'error' => $e->getMessage()
             ], 500);
         }
-        
-
-
     }
     
-public function getAppartmentbyProject($id){
-    try {
-$Appartements = Appartement::with('Projet','Categorie')
-    ->where('project_id', $id)
-    ->get();
+    public function getAppartmentbyProject($id){
+        try {
+            $appartements = Appartement::with('projet', 'Categorie')
+                ->where('project_id', $id)
+                ->get();
 
-if($Appartements->isEmpty()){
-         return response()->json([
+            if($appartements->isEmpty()){
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'No apartments found in this residence.',
+                ], 404);
+            }
+
+            // Transform collection keys to English
+            $result = $appartements->map(function($app) {
+                return [
+                    'floor' => $app->etage,
+                    'surface' => $app->superfice,
+                    'price' => $app->prix,
+                    'category_id' => $app->categorie_id,
+                    'view' => $app->vue,
+                    'plan' => $app->plan,
+                    'project_id' => $app->project_id,
+                    'category' => $app->Categorie,
+                    'project' => $app->projet,
+                ];
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Apartments retrieved successfully.',
+                'appartments' => $result
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
                 'status' => 'error',
-                'message' => 'Aucun Appartement ajouté dans cette residence.',
-                
-            ], 404);
-}
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Appartements récupérés avec succès.',
-            'Appartements' => $Appartements
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Erreur lors de la récupération des projets.',
-            'error' => $e->getMessage()
-        ], 500);
+                'message' => 'Error while retrieving apartments.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
-    //
 }

@@ -32,13 +32,15 @@ class CreateProjectsTable extends Migration
 
             // Clé étrangère vers user (promoteur)
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('ville_id');
+            $table->unsignedBigInteger('region_id');
+            $table->unsignedBigInteger('type_id');
 
             $table->timestamps();
 
             // Clé étrangère user_id qui référence la table users
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('ville_id')->references('id')->on('ville')->onDelete('cascade');
+            $table->foreign('region_id')->references('id')->on('region')->onDelete('cascade');
+            $table->foreign('type_id')->references('id')->on('type')->onDelete('cascade');
 
         });
     }

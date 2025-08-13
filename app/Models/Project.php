@@ -13,12 +13,13 @@ class Project extends Model
         'name',
         'address',
         'presentation',
-        'ville_id',
+        'region_id',
         'nb_appartements',
         'surface',
         'photo_couverture',
         'gallerie_images',
         'gallerie_videos',
+        'type_id',
         'logo',
         'email',
         'user_id', // clé étrangère vers le promoteur
@@ -40,7 +41,10 @@ class Project extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-
+   public function type()
+    {
+        return $this->belongsTo(Type::class, 'type_id');
+    }
     /**
      * Relation vers les appartements du projet.
      */
@@ -55,8 +59,8 @@ public function user()
 {
     return $this->belongsTo(User::class);
 }
-public function Ville(){
-            return $this->belongsTo(Ville::class, 'ville_id');
+public function Region(){
+            return $this->belongsTo(Region::class, 'region_id');
 
 }
 }

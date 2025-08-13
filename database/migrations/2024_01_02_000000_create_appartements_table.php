@@ -17,7 +17,7 @@ class CreateappartementsTable extends Migration
             $table->integer('etage');
             $table->float('superfice');
             $table->float('prix');
-            $table->string('plan')->nullable();
+            $table->string('plan');
             $table->string('vue')->nullable();
 
    

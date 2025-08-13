@@ -19,58 +19,61 @@ class OptionController extends Controller
 
             if ($validator->fails()) {
                 return response()->json([
-                    'status' => 'error',
+                    'status'  => 'error',
                     'message' => 'Validation failed',
-                    'errors' => $validator->errors()
+                    'errors'  => $validator->errors()
                 ], 422);
             }
 
-            // Chemin par défaut pour l'icône
-            $iconPath = 'options/icons/defaut_icon.png';
+            // Default icon path
+            $iconPath = 'options/icons/default_icon.png';
 
-            // Gestion de l'upload si une icône est fournie
+            // Handle upload if an icon is provided
             if ($request->hasFile('icon_opt')) {
                 $uploadedIcon = $request->file('icon_opt');
-                
-                // Stockage dans storage/app/public/options/icons
+
+                // Store in storage/app/public/options/icons
                 $iconPath = $uploadedIcon->store('options/icons', 'public');
             }
 
-            // Création de l'option
+            // Create option
             $option = Option::create([
                 'name_opt' => $request->name_opt,
                 'icon_opt' => $iconPath
             ]);
 
             return response()->json([
-                'status' => 'success',
-                'message' => 'Option créée avec succès',
-                'data' => $option
+                'status'  => 'success',
+                'message' => 'Option created successfully',
+                'data'    => $option
             ], 201);
 
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur interne du serveur',
-                'error' => $th->getMessage()
+                'status'  => 'error',
+                'message' => 'Internal server error',
+                'error'   => $th->getMessage()
             ], 500);
         }
     }
-    public function showOption(Request $request){
-try {
-    $options=Option::get();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Liste des projets récupérée avec succès',
-            'Option' => $options
-        ], 200);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Erreur lors de la récupération des projets',
-            'error' => $e->getMessage()
-        ], 500);
-    }
+
+    public function showOption(Request $request)
+    {
+        try {
+            $options = Option::get();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Options list retrieved successfully',
+                'options' => $options
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Error retrieving options',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
 }

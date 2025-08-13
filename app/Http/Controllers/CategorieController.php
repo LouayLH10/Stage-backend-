@@ -19,43 +19,47 @@ class CategorieController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status'  => 'error',
-                    'message' => 'Validation échouée',
+                    'message' => 'Validation failed',
                     'errors'  => $validator->errors()
                 ], 422);
             }
 
-            // ✅ Création de la catégorie
+            // ✅ Create category
             $categorie = Categorie::create([
                 'nom_cat' => $request->nom_cat,
             ]);
 
             return response()->json([
                 'status'    => 'success',
-                'message'   => 'Catégorie ajoutée avec succès',
+                'message'   => 'Category added successfully',
                 'categorie' => $categorie
             ], 201);
 
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Erreur serveur',
+                'message' => 'Server error',
                 'error'   => $e->getMessage()
             ], 500);
         }
     }
-    public function getCat(){
+
+    public function getCat()
+    {
         try {
-            $categories=Categorie::get();
-                        return response()->json([
-                'status' => 'success',
-                'message' => 'Liste des categories récupérée avec succès',
-                'categories' => $categories
+            $categories = Categorie::get();
+
+            return response()->json([
+                'status'      => 'success',
+                'message'     => 'Category list retrieved successfully',
+                'categories'  => $categories
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur lors de la récupération des projets',
-                'error' => $e->getMessage()
+                'status'  => 'error',
+                'message' => 'Error retrieving categories',
+                'error'   => $e->getMessage()
             ], 500);
         }
     }

@@ -12,14 +12,14 @@ class CaracteristiqueController extends Controller
     public function addCaracteristique(Request $request)
     {
         try {
-            $isMultiple = is_array($request->input('opt_id')); // détecter si on reçoit un tableau
+            $isMultiple = is_array($request->input('opt_id')); // Detect if we receive an array
 
             if ($isMultiple) {
-                // ➤ Insertion multiple
+                // ➤ Multiple insert
                 $opt_ids = $request->input('opt_id');
                 $project_id = $request->input('project_id');
 
-                // Validation générale
+                // General validation
                 $validator = Validator::make($request->all(), [
                     'opt_id'     => 'required|array|min:1',
                     'opt_id.*'   => 'required|exists:options,id',
@@ -29,12 +29,12 @@ class CaracteristiqueController extends Controller
                 if ($validator->fails()) {
                     return response()->json([
                         'status'  => 'error',
-                        'message' => 'Validation échouée',
+                        'message' => 'Validation failed',
                         'errors'  => $validator->errors()
                     ], 422);
                 }
 
-                // Préparation des données
+                // Prepare data
                 $now = Carbon::now();
                 $data = [];
 
@@ -51,12 +51,12 @@ class CaracteristiqueController extends Controller
 
                 return response()->json([
                     'status'  => 'success',
-                    'message' => 'Caractéristiques ajoutées avec succès',
+                    'message' => 'Features added successfully',
                     'count'   => count($data)
                 ], 201);
 
             } else {
-                // ➤ Insertion simple
+                // ➤ Single insert
                 $validator = Validator::make($request->all(), [
                     'opt_id'     => 'required|exists:options,id',
                     'project_id' => 'required|exists:projects,id',
@@ -65,7 +65,7 @@ class CaracteristiqueController extends Controller
                 if ($validator->fails()) {
                     return response()->json([
                         'status'  => 'error',
-                        'message' => 'Validation échouée',
+                        'message' => 'Validation failed',
                         'errors'  => $validator->errors()
                     ], 422);
                 }
@@ -76,16 +76,16 @@ class CaracteristiqueController extends Controller
                 ]);
 
                 return response()->json([
-                    'status'         => 'success',
-                    'message'        => 'Caractéristique ajoutée avec succès',
-                    'caracteristique'=> $caracteristique
+                    'status'          => 'success',
+                    'message'         => 'Feature added successfully',
+                    'features' => $caracteristique
                 ], 201);
             }
 
         } catch (\Exception $e) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Erreur serveur',
+                'message' => 'Server error',
                 'error'   => $e->getMessage()
             ], 500);
         }

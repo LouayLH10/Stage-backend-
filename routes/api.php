@@ -11,28 +11,35 @@ use App\Http\Controllers\CaracteristiqueController;
 use  App\Http\Controllers\CategorieController;
 use  App\Http\Controllers\VilleController;
 use  App\Http\Controllers\UserController;
+use  App\Http\Controllers\TypeController;
+use  App\Http\Controllers\RegionController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
-Route::put('/update-project/{id}', [ProjectController::class, 'update']);
-Route::delete('/delete-project/{id}', [ProjectController::class, 'destroy']);
+Route::put('/projects/{id}', [ProjectController::class, 'update']);
+Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
 
-Route::get('/projects', [ProjectController::class, 'display']);
+
 Route::get('/categories', [CategorieController::class, 'getCat']);
 Route::get('/users', [UserController::class, 'display']);
 
-Route::post('/add-projects', [ProjectController::class, 'store']);
-Route::post('/add-option', [OptionController::class, 'addOptions']);
+Route::post('/projects', [ProjectController::class, 'store']);
+Route::post('/options', [OptionController::class, 'addOptions']);
 Route::get('/options', [OptionController::class, 'showOption']);
-Route::post('/add_caracteristique',[CaracteristiqueController::class,'addCaracteristique']);
+Route::post('/caracteristiques',[CaracteristiqueController::class,'addCaracteristique']);
 Route::get('/projects/{id}', [ProjectController::class, 'get_projectById']);
-Route::get('/search-projects', [ProjectController::class, 'getProjectbyCity']);
+Route::get('/projects', [ProjectController::class, 'filterProjects']);
+Route::get('/types', [TypeController::class, 'get_types']);
+Route::post('/types', [TypeController::class, 'add_type']);
 Route::get('/appartements/{id}',[AppartementController::class,'getAppartmentbyProject']);
 Route::get('/google-profile', [GoogleController::class, 'getProfile']);
-Route::post('/add_appartement',[AppartementController::class,'addappartement']);
-Route::post('/add_categorie',[CategorieController::class,'addCat']);
-Route::get('/villes',[VilleController::class,'get_villes']);
+Route::post('/appartements',[AppartementController::class,'addappartement']);
+Route::post('/categories',[CategorieController::class,'addCat']);
+Route::get('/villes',[VilleController::class,'getCities']);
+Route::post('/villes',[VilleController::class,'addCity']);
+Route::post('/regions',[RegionController::class,'add_region']);
+Route::get('/regions',[RegionController::class,'display']);
 
 // ✅ Toutes les routes protégées par Sanctum
 Route::middleware('auth:sanctum')->group(function () {

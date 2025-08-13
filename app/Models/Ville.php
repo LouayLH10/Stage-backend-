@@ -10,6 +10,6 @@ class Ville extends Model
     protected $fillable=[
     "nom_ville"
 ];
-
+ public $timestamps = false;
         
 }
