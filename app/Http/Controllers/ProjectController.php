@@ -101,6 +101,9 @@ public function display()
                     'address' => $project->address,
                     'presentation' => $project->presentation,
                     'region_id' => $project->region_id,
+                    'region'=>$project->region,
+                    'type'=>$project->type,
+                    'user'=>$project->user,
                     'apartments_count' => $project->nb_appartements, // traduit
                     'surface' => $project->surface,
                     'email' => $project->email,

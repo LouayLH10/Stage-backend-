@@ -27,7 +27,7 @@ Route::get('/users', [UserController::class, 'display']);
 Route::post('/projects', [ProjectController::class, 'store']);
 Route::post('/options', [OptionController::class, 'addOptions']);
 Route::get('/options', [OptionController::class, 'showOption']);
-Route::post('/caracteristiques',[CaracteristiqueController::class,'addCaracteristique']);
+Route::post('/features',[CaracteristiqueController::class,'addCaracteristique']);
 Route::get('/projects/{id}', [ProjectController::class, 'get_projectById']);
 Route::get('/projects', [ProjectController::class, 'filterProjects']);
 Route::get('/types', [TypeController::class, 'get_types']);
@@ -36,8 +36,8 @@ Route::get('/appartements/{id}',[AppartementController::class,'getAppartmentbyPr
 Route::get('/google-profile', [GoogleController::class, 'getProfile']);
 Route::post('/appartements',[AppartementController::class,'addappartement']);
 Route::post('/categories',[CategorieController::class,'addCat']);
-Route::get('/villes',[VilleController::class,'getCities']);
-Route::post('/villes',[VilleController::class,'addCity']);
+Route::get('/cities',[VilleController::class,'getCities']);
+Route::post('/cities',[VilleController::class,'addCity']);
 Route::post('/regions',[RegionController::class,'add_region']);
 Route::get('/regions',[RegionController::class,'display']);
 

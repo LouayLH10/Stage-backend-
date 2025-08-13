@@ -90,4 +90,41 @@ class CaracteristiqueController extends Controller
             ], 500);
         }
     }
+    public function getCaracteristiques($project_id)
+{
+    try {
+   
+        $validator = Validator::make(
+            ['project_id' => $project_id],
+            ['project_id' => 'required|exists:projects,id']
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        // Récupérer toutes les caractéristiques liées au projet
+        $caracteristiques = Caracteristique::with('option') // suppose que tu as une relation option()
+            ->where('project_id', $project_id)
+            ->get();
+
+        return response()->json([
+            'status' => 'success',
+            'count'  => $caracteristiques->count(),
+            'data'   => $caracteristiques
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Server error',
+            'error'   => $e->getMessage()
+        ], 500);
+    }
+}
+
 }
