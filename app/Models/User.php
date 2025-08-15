@@ -21,7 +21,7 @@ class User extends Authenticatable
         'email',
         'password',
         'num_tel',
-        'pages'
+        'isblocked'
     ];
 
     /**

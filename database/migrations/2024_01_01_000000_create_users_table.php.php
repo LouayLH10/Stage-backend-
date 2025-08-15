@@ -18,8 +18,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('num_tel')->nullable();  // Nullable si non obligatoire
-            $table->json('pages')->nullable();      // Mieux que string pour stocker fb/insta/linkedin
+            $table->string('num_tel');
+            $table->boolean('isblocked')->default(false);
+            // Nullable si non obligatoire
+         // Mieux que string pour stocker fb/insta/linkedin
             $table->rememberToken();
             $table->timestamps();
         });

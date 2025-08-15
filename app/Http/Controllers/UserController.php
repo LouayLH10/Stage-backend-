@@ -7,9 +7,32 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function block()
+    public function toggleblock($id)
     {
-        // Block user logic will be implemented here
+        try {
+  $user=User::find($id);
+  if(!$user){
+         return response()->json([
+                    'status' => 'error',
+                    'message' => 'User not found',
+                ], 404);
+  }
+  $user->isblocked=!$user->isblocked;
+  $user->save();
+         return response()->json([
+                    'status' => 'sucess',
+                    'message' => 'User blocked/unblocked',
+                ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                    'status' => 'error',
+                    'message' => 'error',
+                     'error' => $e->getMessage()
+                ], 500);
+        }
+  
+
+
     }
 
     public function display()

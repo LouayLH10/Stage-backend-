@@ -12,59 +12,70 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     public function login(Request $request)
-    {
-        try {
-            // 1. Validate data
-            $request->validate([
-                'email' => 'required|email',
-                'password' => 'required|string|min:8',
+{
+    try {
+        // 1. Validate data
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ]);
+
+        // 2. Attempt authentication
+        if (!Auth::attempt($request->only('email', 'password'))) {
+            throw ValidationException::withMessages([
+                'email' => ['Invalid credentials.'],
             ]);
-
-            // 2. Attempt authentication
-            if (!Auth::attempt($request->only('email', 'password'))) {
-                throw ValidationException::withMessages([
-                    'email' => ['Invalid credentials.'],
-                ]);
-            }
-
-            // 3. Get authenticated user
-            $user = Auth::user();
-
-            // 4. Remove old tokens (optional)
-            $user->tokens()->delete();
-
-            // 5. Create new token
-            $token = $user->createToken('auth-token')->plainTextToken;
-
-            // 6. JSON Response
-            return response()->json([
-                'success' => true,
-                'token' => $token,
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                ],
-                'message' => 'Login successful'
-            ], 200);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation error',
-                'errors' => $e->errors()
-            ], 422);
-
-        } catch (\Exception $e) {
-            \Log::error('Login error: ' . $e->getMessage());
-            
-            return response()->json([
-                'success' => false,
-                'message' => 'Internal server error',
-                'error' => $e->getMessage() // Disable in production
-            ], 500);
         }
+
+        // 3. Get authenticated user
+        $user = Auth::user();
+
+        // 4. Check if user is blocked
+        if ($user->isblocked) {
+            // Logout just in case
+            Auth::logout();
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account is blocked. Please contact support.'
+            ], 403);
+        }
+
+        // 5. Remove old tokens (optional)
+        $user->tokens()->delete();
+
+        // 6. Create new token
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        // 7. JSON Response
+        return response()->json([
+            'success' => true,
+            'token' => $token,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'message' => 'Login successful'
+        ], 200);
+
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Validation error',
+            'errors' => $e->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        \Log::error('Login error: ' . $e->getMessage());
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Internal server error',
+            'error' => $e->getMessage() // Disable in production
+        ], 500);
     }
+}
+
 
     public function logout(Request $request)
     {
@@ -113,17 +124,21 @@ class AuthController extends Controller
     {
         try {
             // Validate data
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
-            ]);
+     $validatedData = $request->validate([
+    'name' => 'required|string|max:255',
+    'email' => 'required|string|email|max:255|unique:users',
+    'password' => 'required|string|min:8|confirmed',
+    'num_tel' => 'required|digits:8'
+]);
+
 
             // Prepare data
             $userData = [
                 'name' => $validatedData['name'],
                 'email' => $validatedData['email'],
                 'password' => bcrypt($validatedData['password']),
+                'num_tel'=>$validatedData['num_tel'],
+                'isblocked'=>false,
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
             ];
@@ -159,4 +174,5 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
 }

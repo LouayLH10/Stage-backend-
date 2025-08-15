@@ -23,7 +23,7 @@ Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
 
 Route::get('/categories', [CategorieController::class, 'getCat']);
 Route::get('/users', [UserController::class, 'display']);
-
+Route::delete('/users/{id}',[UserController::class,'toggleblock']);
 Route::post('/projects', [ProjectController::class, 'store']);
 Route::post('/options', [OptionController::class, 'addOptions']);
 Route::get('/options', [OptionController::class, 'showOption']);
