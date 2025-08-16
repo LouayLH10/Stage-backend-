@@ -39,7 +39,7 @@ Route::post('/categories',[CategorieController::class,'addCat']);
 Route::get('/cities',[VilleController::class,'getCities']);
 Route::post('/cities',[VilleController::class,'addCity']);
 Route::post('/regions',[RegionController::class,'add_region']);
-Route::get('/regions',[RegionController::class,'display']);
+Route::get('/regions/{id}',[RegionController::class,'display']);
 
 // ✅ Toutes les routes protégées par Sanctum
 Route::middleware('auth:sanctum')->group(function () {

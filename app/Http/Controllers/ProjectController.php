@@ -91,31 +91,38 @@ class ProjectController extends Controller
 public function display()
 {
     try {
-        $projects = Project::with('user', 'region.ville', 'caracteristiques.option','type')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($project) {
-                return [
-                    'id' => $project->id,
-                    'name' => $project->name,
-                    'address' => $project->address,
-                    'presentation' => $project->presentation,
-                    'region_id' => $project->region_id,
-                    'region'=>$project->region,
-                    'type'=>$project->type,
-                    'user'=>$project->user,
-                    'apartments_count' => $project->nb_appartements, // traduit
-                    'surface' => $project->surface,
-                    'email' => $project->email,
-                    'user_id' => $project->user_id,
-                    'cover_photo' => $project->photo_couverture, // traduit
-                    'logo' => $project->logo,
-                    'gallery_images' => json_decode($project->gallerie_images, true), // traduit
-                    'gallery_videos' => json_decode($project->gallerie_videos, true), // traduit
-                    'created_at' => $project->created_at,
-                    'updated_at' => $project->updated_at,
-                ];
-            });
+       $projects = Project::with('user', 'region.ville', 'caracteristiques.option', 'type')
+    ->orderBy('created_at', 'desc')
+    ->get()
+    ->map(function ($project) {
+        return [
+            'id' => $project->id,
+            'name' => $project->name,
+            'address' => $project->address,
+            'presentation' => $project->presentation,
+            'region_id' => $project->region_id,
+            'region' => [
+                "region_name" => $project->region->nom_region ?? null,
+                "id_city"     => $project->region->ville_id ?? null,
+                "city" => [
+                    "city_name" => $project->region->ville->nom_ville ?? null,
+                ],
+            ],
+            'type' => $project->type,
+            'user' => $project->user,
+            'apartments_count' => $project->nb_appartements, // traduit
+            'surface' => $project->surface,
+            'email' => $project->email,
+            'user_id' => $project->user_id,
+            'cover_photo' => $project->photo_couverture, // traduit
+            'logo' => $project->logo,
+            'gallery_images' => json_decode($project->gallerie_images, true), // traduit
+            'gallery_videos' => json_decode($project->gallerie_videos, true), // traduit
+            'created_at' => $project->created_at,
+            'updated_at' => $project->updated_at,
+        ];
+    });
+
 
         return response()->json([
             'status' => 'success',
@@ -223,6 +230,7 @@ public function get_projectById($id)
             'created_at' => $item->user->created_at ?? null,
             'updated_at' => $item->user->updated_at ?? null,
         ],
+
     ];
 });
 

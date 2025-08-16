@@ -7,9 +7,9 @@ use App\Models\Region;
  
 class RegionController extends Controller
 {
-    public function display(Request $request){
+    public function display($id){
         try {
-            $villeId = $request->ville_id;
+            $villeId = $id;
 
             $regions = Region::with('ville')
                 ->where('ville_id', $villeId)
