@@ -9,27 +9,27 @@ class RegionController extends Controller
 {
     public function display($id){
         try {
-            $villeId = $id;
+            $cityId = $id;
 
-            $regions = Region::with('ville')
-                ->where('ville_id', $villeId)
+            $regions = Region::with('city')
+                ->where('cityId', $cityId)
                 ->get();
 
             if ($regions->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No project found in this city.',
-                    'ville_id' => $villeId
+                    'cityId' => $cityId
                 ], 404);
             }
    $regions = $regions->map(function ($item) {
     return [
         "id"=>$item->id,
-        "region_name"=>$item->nom_region,
-        "city_id"=>$item->ville_id,
+        "region_name"=>$item->region,
+        "city_id"=>$item->cityId,
         "city"=>[
-            "id"=>$item->ville->id,
-            "city_name"=>$item->ville->nom_ville,
+            "id"=>$item->city->id,
+            "city_name"=>$item->city->city,
         ]
 
         ];
@@ -53,8 +53,8 @@ class RegionController extends Controller
     {
         // Validation
         $validated = $request->validate([
-            'nom_region' => 'required|string|max:255',
-            'ville_id'   => 'required|exists:ville,id'
+            'region' => 'required|string|max:255',
+            'cityId'   => 'required|exists:city,id'
         ]);
 
         // Create region

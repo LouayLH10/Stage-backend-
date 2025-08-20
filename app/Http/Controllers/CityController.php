@@ -3,15 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Ville;
+use App\Models\City;
 use Illuminate\Support\Facades\Validator;
 
-class VilleController extends Controller
+class CityController extends Controller
 {
     public function getCities()
     {
         try {
-            $cities = Ville::get();
+            $cities = City::get();
 
             return response()->json([
                 'status' => 'success',
@@ -42,8 +42,8 @@ class VilleController extends Controller
             ], 422);
         }
 
-        $city = Ville::create([
-            'nom_ville' => $request->city_name
+        $city = City::create([
+            'city' => $request->city_name
         ]);
 
         return response()->json([

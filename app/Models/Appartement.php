@@ -10,45 +10,45 @@ class Appartement extends Model
     use HasFactory;
 
     protected $fillable = [
-        "etage",
-        "superfice",
-        "categorie_id",
-        "prix",
+        "floor",
+        "surface",
+        "categoryId",
+        "price",
         "plan",
-        "vue",
-        "project_id"
+        "view",
+        "projectId"
     ];
 
-    public function categorie()
+    public function category()
     {
-        return $this->belongsTo(Categorie::class, 'categorie_id');
+        return $this->belongsTo(Category::class, 'categoryId');
     }
 
     public function projet()
     {
-        return $this->belongsTo(Project::class, 'project_id');
+        return $this->belongsTo(Project::class, 'projectId');
     }
 
     // Accessors for English attribute names
 
     public function getFloorAttribute()
     {
-        return $this->attributes['etage'];
+        return $this->attributes['floor'];
     }
 
     public function getSurfaceAttribute()
     {
-        return $this->attributes['superfice'];
+        return $this->attributes['surface'];
     }
 
     public function getCategoryIdAttribute()
     {
-        return $this->attributes['categorie_id'];
+        return $this->attributes['categoryId'];
     }
 
     public function getPriceAttribute()
     {
-        return $this->attributes['prix'];
+        return $this->attributes['price'];
     }
 
     public function getPlanAttribute()
@@ -58,11 +58,11 @@ class Appartement extends Model
 
     public function getViewAttribute()
     {
-        return $this->attributes['vue'];
+        return $this->attributes['view'];
     }
 
     public function getProjectIdAttribute()
     {
-        return $this->attributes['project_id'];
+        return $this->attributes['projectId'];
     }
 }

@@ -3,27 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Caracteristique;
+use App\Models\Feature;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Carbon;
 
-class CaracteristiqueController extends Controller
+class FeaturesController extends Controller
 {
-    public function addCaracteristique(Request $request)
+    public function addFeature(Request $request)
     {
         try {
-            $isMultiple = is_array($request->input('opt_id')); // Detect if we receive an array
+            $isMultiple = is_array($request->input('optionId')); // Detect if we receive an array
 
             if ($isMultiple) {
                 // ➤ Multiple insert
-                $opt_ids = $request->input('opt_id');
-                $project_id = $request->input('project_id');
+                $optionIds = $request->input('optionId');
+                $projectId = $request->input('projectId');
 
                 // General validation
                 $validator = Validator::make($request->all(), [
-                    'opt_id'     => 'required|array|min:1',
-                    'opt_id.*'   => 'required|exists:options,id',
-                    'project_id' => 'required|exists:projects,id',
+                    'optionId'     => 'required|array|min:1',
+                    'optionId.*'   => 'required|exists:options,id',
+                    'projectId' => 'required|exists:projects,id',
                 ]);
 
                 if ($validator->fails()) {
@@ -38,16 +38,16 @@ class CaracteristiqueController extends Controller
                 $now = Carbon::now();
                 $data = [];
 
-                foreach ($opt_ids as $opt_id) {
+                foreach ($optionIds as $optionId) {
                     $data[] = [
-                        'opt_id'     => $opt_id,
-                        'project_id' => $project_id,
+                        'optionId'     => $optionId,
+                        'projectId' => $projectId,
                         'created_at' => $now,
                         'updated_at' => $now,
                     ];
                 }
 
-                Caracteristique::insert($data);
+                Feature::insert($data);
 
                 return response()->json([
                     'status'  => 'success',
@@ -58,8 +58,8 @@ class CaracteristiqueController extends Controller
             } else {
                 // ➤ Single insert
                 $validator = Validator::make($request->all(), [
-                    'opt_id'     => 'required|exists:options,id',
-                    'project_id' => 'required|exists:projects,id',
+                    'optionId'     => 'required|exists:options,id',
+                    'projectId' => 'required|exists:projects,id',
                 ]);
 
                 if ($validator->fails()) {
@@ -70,15 +70,15 @@ class CaracteristiqueController extends Controller
                     ], 422);
                 }
 
-                $caracteristique = Caracteristique::create([
-                    'opt_id'     => $request->opt_id,
-                    'project_id' => $request->project_id,
+                $Feature = Feature::create([
+                    'optionId'     => $request->optionId,
+                    'projectId' => $request->projectId,
                 ]);
 
                 return response()->json([
                     'status'          => 'success',
                     'message'         => 'Feature added successfully',
-                    'features' => $caracteristique
+                    'features' => $Feature
                 ], 201);
             }
 
@@ -90,13 +90,13 @@ class CaracteristiqueController extends Controller
             ], 500);
         }
     }
-    public function getCaracteristiques($project_id)
+    public function getFeatures($projectId)
 {
     try {
    
         $validator = Validator::make(
-            ['project_id' => $project_id],
-            ['project_id' => 'required|exists:projects,id']
+            ['projectId' => $projectId],
+            ['projectId' => 'required|exists:projects,id']
         );
 
         if ($validator->fails()) {
@@ -108,14 +108,14 @@ class CaracteristiqueController extends Controller
         }
 
         // Récupérer toutes les caractéristiques liées au projet
-        $caracteristiques = Caracteristique::with('option') // suppose que tu as une relation option()
-            ->where('project_id', $project_id)
+        $Features = Feature::with('option') // suppose que tu as une relation option()
+            ->where('projectId', $projectId)
             ->get();
 
         return response()->json([
             'status' => 'success',
-            'count'  => $caracteristiques->count(),
-            'data'   => $caracteristiques
+            'count'  => $Features->count(),
+            'data'   => $Features
         ], 200);
 
     } catch (\Exception $e) {

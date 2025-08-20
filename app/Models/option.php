@@ -9,8 +9,8 @@ class option extends Model
 {
      use HasFactory;
 protected $fillable=[
-    'name_opt',
-    'icon_opt'
+    'option',
+    'icon'
 ];
 
 }

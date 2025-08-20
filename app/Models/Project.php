@@ -13,25 +13,25 @@ class Project extends Model
         'name',
         'address',
         'presentation',
-        'region_id',
-        'nb_appartements',
+        'regionId',
+        'numberOfAppartements',
         'surface',
-        'photo_couverture',
-        'gallerie_images',
-        'gallerie_videos',
-        'type_id',
+        'coverphoto',
+        'galleryimages',
+        'galleryvideos',
+        'typeId',
         'logo',
         'email',
-        'user_id', // clé étrangère vers le promoteur
+        'userId', // clé étrangère vers le promoteur
         
     ];
 
     protected $casts = [
 
-        'gallerie_images' => 'array',
-        'gallerie_videos' => 'array',
+        'galleryimages' => 'array',
+        'galleryvideos' => 'array',
         'surface' => 'float',
-        'nb_appartements' => 'integer',
+        'numberOfAppartements' => 'integer',
     ];
 
     /**
@@ -39,11 +39,11 @@ class Project extends Model
      */
     public function promoteur()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'userId');
     }
    public function type()
     {
-        return $this->belongsTo(Type::class, 'type_id');
+        return $this->belongsTo(Type::class, 'typeId');
     }
     /**
      * Relation vers les appartements du projet.
@@ -52,15 +52,15 @@ class Project extends Model
     {
         return $this->hasMany(Appartement::class);
     }
-    public function caracteristiques (){
-        return $this->hasMany(Caracteristique::class);
+    public function Features (){
+        return $this->hasMany(Feature::class,'projectId');
     }
 public function user()
 {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(User::class,'userId');
 }
 public function Region(){
-            return $this->belongsTo(Region::class, 'region_id');
+            return $this->belongsTo(Region::class, 'regionId');
 
 }
 }

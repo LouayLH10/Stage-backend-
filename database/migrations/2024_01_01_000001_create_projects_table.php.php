@@ -17,30 +17,30 @@ class CreateProjectsTable extends Migration
             $table->string('name');
             $table->string('address');
             $table->text('presentation');
-            $table->integer('nb_appartements');
+            $table->integer('numberOfAppartements');
             $table->float('surface');
 
-            // On suppose que photo_couverture, logo sont des chemins ou URLs d'images
-            $table->string('photo_couverture');
+            // On suppose que coverphoto, logo sont des chemins ou URLs d'images
+            $table->string('coverphoto');
 
             // Gallerie images et vidéos peuvent être stockées en JSON (tableau de chemins/URLs)
-            $table->json('gallerie_images');
-            $table->json('gallerie_videos');
+            $table->json('galleryimages');
+            $table->json('galleryvideos');
 
             $table->string('logo');
             $table->string('email');
 
             // Clé étrangère vers user (promoteur)
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('region_id');
-            $table->unsignedBigInteger('type_id');
+            $table->unsignedBigInteger('userId');
+            $table->unsignedBigInteger('regionId');
+            $table->unsignedBigInteger('typeId');
 
             $table->timestamps();
 
-            // Clé étrangère user_id qui référence la table users
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('region_id')->references('id')->on('region')->onDelete('cascade');
-            $table->foreign('type_id')->references('id')->on('type')->onDelete('cascade');
+            // Clé étrangère userId qui référence la table users
+            $table->foreign('userId')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('regionId')->references('id')->on('region')->onDelete('cascade');
+            $table->foreign('typeId')->references('id')->on('type')->onDelete('cascade');
 
         });
     }

@@ -11,13 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('type', function (Blueprint $table) {
+        Schema::create('category', function (Blueprint $table) {
             $table->id();
-            $table->string("type");
+            $table->string('category');
             $table->timestamps();
         });
-           DB::table('type')->insert([
-            ['type' => 'Appartement']
+         DB::table('category')->insert([
+            ['category' => 'S+0'],
+            ['category' => 'S+1'],
+            ['category' => 'S+2'],
+            ['category' => 'S+3'],
+            ['category' => 'S+4'],
+            ['category' => 'S+5'],
+            ['category' => 'S+6'],
         ]);
     }
 
@@ -26,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('type');
+        Schema::dropIfExists('category');
     }
 };

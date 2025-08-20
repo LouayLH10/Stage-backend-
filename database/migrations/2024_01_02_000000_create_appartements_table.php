@@ -14,23 +14,23 @@ class CreateappartementsTable extends Migration
         Schema::create('appartements', function (Blueprint $table) {
             $table->id();
 
-            $table->integer('etage');
-            $table->float('superfice');
-            $table->float('prix');
+            $table->integer('floor');
+            $table->float('surface');
+            $table->float('price');
             $table->string('plan');
-            $table->string('vue')->nullable();
+            $table->string('view')->nullable();
 
    
 
             // Clé étrangère vers user (promoteur)
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('categorie_id');
+            $table->unsignedBigInteger('projectId');
+            $table->unsignedBigInteger('categoryId');
       
 $table->timestamps(); // Ajoute automatiquement created_at et updated_at
 
-            // Clé étrangère user_id qui référence la table users
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('categorie_id')->references('id')->on('categorie')->onDelete('cascade');
+            // Clé étrangère userId qui référence la table users
+            $table->foreign('projectId')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('categoryId')->references('id')->on('category')->onDelete('cascade');
 
         });
     }

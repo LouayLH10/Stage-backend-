@@ -9,12 +9,13 @@ use App\Models\Option;
 
 class OptionController extends Controller
 {
+    // Ajouter une option
     public function addOptions(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'name_opt' => 'required|string|max:255',
-                'icon_opt' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+                'option' => 'required|string|max:255',
+                'icon' => 'nullable|file|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
             ]);
 
             if ($validator->fails()) {
@@ -25,22 +26,25 @@ class OptionController extends Controller
                 ], 422);
             }
 
-            // Default icon path
-            $iconPath = 'options/icons/default_icon.png';
+            // Chemin par défaut de l'icône
+            $iconPath = 'options/default_icons/default_icon.png';
 
-            // Handle upload if an icon is provided
-            if ($request->hasFile('icon_opt')) {
-                $uploadedIcon = $request->file('icon_opt');
+            // Gestion du téléchargement de l'icône si fournie
+            if ($request->hasFile('icon')) {
+                $uploadedIcon = $request->file('icon');
 
-                // Store in storage/app/public/options/icons
+                // Stockage dans storage/app/public/options/icons
                 $iconPath = $uploadedIcon->store('options/icons', 'public');
             }
 
-            // Create option
+            // Création de l'option
             $option = Option::create([
-                'name_opt' => $request->name_opt,
-                'icon_opt' => $iconPath
+                'option' => $request->option,
+                'icon' => $iconPath
             ]);
+
+            // Pour retourner un lien accessible depuis le frontend
+            $option->icon_url = asset('storage/' . $option->icon);
 
             return response()->json([
                 'status'  => 'success',
@@ -57,10 +61,17 @@ class OptionController extends Controller
         }
     }
 
+    // Récupérer toutes les options
     public function showOption(Request $request)
     {
         try {
-            $options = Option::get();
+            $options = Option::all();
+
+            // Ajouter l'URL publique de chaque icône
+            $options->map(function ($opt) {
+                $opt->icon_url = asset('storage/' . $opt->icon);
+                return $opt;
+            });
 
             return response()->json([
                 'status'  => 'success',

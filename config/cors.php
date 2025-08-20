@@ -1,27 +1,13 @@
 <?php
 return [
-
-    'paths' => [
-        'api/*',
-        'sanctum/csrf-cookie',
-        'login',
-        'logout',
-    ],
-
+    'paths' => ['api/*'],
+    'allowed_origins' => ['http://localhost:3000'], // URL de votre front
     'allowed_methods' => ['*'],
-
-    // IMPORTANT : ne pas mettre '*' ici si you use credentials
-    'allowed_origins' => [
-        'http://localhost:3000',
-    ],
-
-    'allowed_origins_patterns' => [],
-
-    'allowed_headers' => ['*'],
-
+    'allowed_headers' => [       '*',
+        'Content-Type', // ← Essentiel pour FormData
+        'X-Requested-With',
+        'Authorization'],
     'exposed_headers' => [],
-
-    // ✅ Permet d’envoyer les cookies avec les requêtes frontend
-    'supports_credentials' => true,
-
+    'max_age' => 0,
+    'supports_credentials' => false,
 ];

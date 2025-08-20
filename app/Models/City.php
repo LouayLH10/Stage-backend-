@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Ville extends Model
+class City extends Model
 {
-    protected $table="ville";
+    protected $table="city";
     protected $fillable=[
-    "nom_ville"
+    "city"
 ];
  public $timestamps = false;
         

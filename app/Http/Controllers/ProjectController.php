@@ -17,17 +17,17 @@ class ProjectController extends Controller
                 'name' => 'required|string',
                 'address' => 'required|string',
                 'presentation' => 'required|string',
-                'region_id' => 'required|exists:region,id',
-                'nb_appartements' => 'required|integer',
+                'regionId' => 'required|exists:region,id',
+                'numberOfAppartements' => 'required|integer',
                 'surface' => 'required|numeric',
                 'email' => 'required|email',
-                'user_id' => 'required|exists:users,id',
-                'type_id' => 'required|exists:type,id',
-                'photo_couverture' => 'required|file|image|max:2048',
+                'userId' => 'required|exists:users,id',
+                'typeId' => 'required|exists:type,id',
+                'coverphoto' => 'required|image|mimes:jpg,jpeg,png|max:10000000',
                 'logo' => 'required|file|image|max:2048',
 
-                'gallerie_images.*' => 'file|image|max:2048',
-                'gallerie_videos.*' => 'file|mimetypes:video/mp4,video/avi,video/mov|max:51200',
+                'galleryimages.*' => 'file|image|max:100000000',
+                'galleryvideos.*' => 'file|mimetypes:video/mp4,video/avi,video/mov|max:10000000',
             ]);
 
             if ($validator->fails()) {
@@ -39,19 +39,19 @@ class ProjectController extends Controller
             }
 
             // 📦 Upload files
-            $photoCouverturePath = $request->file('photo_couverture')->store('projects/couvertures', 'public');
+            $photoCouverturePath = $request->file('coverphoto')->store('projects/couvertures', 'public');
             $logoPath = $request->file('logo')->store('projects/logos', 'public');
 
             $galleryImagesPaths = [];
-            if ($request->hasFile('gallerie_images')) {
-                foreach ($request->file('gallerie_images') as $img) {
+            if ($request->hasFile('galleryimages')) {
+                foreach ($request->file('galleryimages') as $img) {
                     $galleryImagesPaths[] = $img->store('projects/images', 'public');
                 }
             }
 
             $galleryVideosPaths = [];
-            if ($request->hasFile('gallerie_videos')) {
-                foreach ($request->file('gallerie_videos') as $video) {
+            if ($request->hasFile('galleryvideos')) {
+                foreach ($request->file('galleryvideos') as $video) {
                     $galleryVideosPaths[] = $video->store('projects/videos', 'public');
                 }
             }
@@ -61,16 +61,16 @@ class ProjectController extends Controller
                 'name' => $request->name,
                 'address' => $request->address,
                 'presentation' => $request->presentation,
-                'region_id' => $request->region_id,
-                'nb_appartements' => $request->nb_appartements,
+                'regionId' => $request->regionId,
+                'numberOfAppartements' => $request->numberOfAppartements,
                 'surface' => $request->surface,
                 'email' => $request->email,
-                'user_id' => $request->user_id,
-                'photo_couverture' => $photoCouverturePath,
+                'userId' => $request->userId,
+                'coverphoto' => $photoCouverturePath,
                 'logo' => $logoPath,
-                'type_id' => $request->type_id,
-                'gallerie_images' => json_encode($galleryImagesPaths),
-                'gallerie_videos' => json_encode($galleryVideosPaths),
+                'typeId' => $request->typeId,
+                'galleryimages' => json_encode($galleryImagesPaths),
+                'galleryvideos' => json_encode($galleryVideosPaths),
             ]);
 
             return response()->json([
@@ -91,38 +91,10 @@ class ProjectController extends Controller
 public function display()
 {
     try {
-       $projects = Project::with('user', 'region.ville', 'caracteristiques.option', 'type')
+       $projects = Project::with('user', 'region.city', 'Features.option', 'type')
     ->orderBy('created_at', 'desc')
-    ->get()
-    ->map(function ($project) {
-        return [
-            'id' => $project->id,
-            'name' => $project->name,
-            'address' => $project->address,
-            'presentation' => $project->presentation,
-            'region_id' => $project->region_id,
-            'region' => [
-                "region_name" => $project->region->nom_region ?? null,
-                "id_city"     => $project->region->ville_id ?? null,
-                "city" => [
-                    "city_name" => $project->region->ville->nom_ville ?? null,
-                ],
-            ],
-            'type' => $project->type,
-            'user' => $project->user,
-            'apartments_count' => $project->nb_appartements, // traduit
-            'surface' => $project->surface,
-            'email' => $project->email,
-            'user_id' => $project->user_id,
-            'cover_photo' => $project->photo_couverture, // traduit
-            'logo' => $project->logo,
-            'gallery_images' => json_decode($project->gallerie_images, true), // traduit
-            'gallery_videos' => json_decode($project->gallerie_videos, true), // traduit
-            'created_at' => $project->created_at,
-            'updated_at' => $project->updated_at,
-        ];
-    });
-
+    ->get();
+   
 
         return response()->json([
             'status' => 'success',
@@ -142,7 +114,7 @@ public function display()
 public function get_projectById($id)
 {
     try {
-        $project = Project::with('user', 'region', 'caracteristiques.option','type')->find($id);
+        $project = Project::with('user', 'region', 'Features.option','type')->find($id);
 
         if (!$project) {
             return response()->json([
@@ -158,15 +130,15 @@ public function get_projectById($id)
                 'name' => $item->name,
                 'address' => $item->address,
                 'presentation' => $item->presentation,
-                'region_id' => $item->region_id,
-                'apartments_count' => $item->nb_appartements, // traduit
+                'regionId' => $item->regionId,
+                'apartments_count' => $item->numberOfAppartements, // traduit
                 'surface' => $item->surface,
                 'email' => $item->email,
-                'user_id' => $item->user_id,
-                'cover_photo' => $item->photo_couverture, // traduit
+                'userId' => $item->userId,
+                'cover_photo' => $item->coverphoto, // traduit
                 'logo' => $item->logo,
-                'gallery_images' => json_decode($item->gallerie_images, true), // traduit
-                'gallery_videos' => json_decode($item->gallerie_videos, true), // traduit
+                'gallery_images' => json_decode($item->galleryimages, true), // traduit
+                'gallery_videos' => json_decode($item->galleryvideos, true), // traduit
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
             ];
@@ -190,17 +162,17 @@ public function get_projectById($id)
     public function getProjectByRegion(Request $request)
     {
         try {
-            $regionId = $request->region_id;
+            $regionId = $request->regionId;
 
             $projects = Project::with('user', 'region','type')
-                ->where('region_id', $regionId)
+                ->where('regionId', $regionId)
                 ->get();
 
             if ($projects->isEmpty()) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'No projects found in this region.',
-                    'region_id' => $regionId
+                    'regionId' => $regionId
                 ], 404);
             }
     $projects = $projects->map(function ($item) {
@@ -209,16 +181,16 @@ public function get_projectById($id)
         'name' => $item->name,
         'address' => $item->address,
         'presentation' => $item->presentation,
-        'region_id' => $item->region_id,
-        'region_name' => $item->region->nom_region ?? null, // traduit
-        'apartments_count' => $item->nb_appartements, // traduit
+        'regionId' => $item->regionId,
+        'region_name' => $item->region->region ?? null, // traduit
+        'apartments_count' => $item->numberOfAppartements, // traduit
         'surface' => $item->surface,
         'email' => $item->email,
-        'user_id' => $item->user_id,
-        'cover_photo' => $item->photo_couverture, // traduit
+        'userId' => $item->userId,
+        'cover_photo' => $item->coverphoto, // traduit
         'logo' => $item->logo,
-        'gallery_images' => json_decode($item->gallerie_images, true), // traduit
-        'gallery_videos' => json_decode($item->gallerie_videos, true), // traduit
+        'gallery_images' => json_decode($item->galleryimages, true), // traduit
+        'gallery_videos' => json_decode($item->galleryvideos, true), // traduit
         'created_at' => $item->created_at,
         'updated_at' => $item->updated_at,
         'user' => [
@@ -265,16 +237,16 @@ public function get_projectById($id)
                 'name' => 'sometimes|required|string',
                 'address' => 'sometimes|required|string',
                 'presentation' => 'sometimes|required|string',
-                'region_id' => 'sometimes|required|exists:region,id',
-                'nb_appartements' => 'sometimes|required|integer',
+                'regionId' => 'sometimes|required|exists:region,id',
+                'numberOfAppartements' => 'sometimes|required|integer',
                 'surface' => 'sometimes|required|numeric',
                 'email' => 'sometimes|required|email',
-                'user_id' => 'sometimes|required|exists:users,id',
+                'userId' => 'sometimes|required|exists:users,id',
 
-                'photo_couverture' => 'nullable|file|image|max:2048',
+                'coverphoto' => 'nullable|file|image|max:2048',
                 'logo' => 'nullable|file|image|max:2048',
-                'gallerie_images.*' => 'nullable|file|image|max:2048',
-                'gallerie_videos.*' => 'nullable|file|mimetypes:video/mp4,video/avi,video/mov|max:51200',
+                'galleryimages.*' => 'nullable|file|image|max:2048',
+                'galleryvideos.*' => 'nullable|file|mimetypes:video/mp4,video/avi,video/mov|max:51200',
             ]);
 
             if ($validator->fails()) {
@@ -286,28 +258,28 @@ public function get_projectById($id)
             }
 
             // Update files
-            if ($request->hasFile('photo_couverture')) {
-                $project->photo_couverture = $request->file('photo_couverture')->store('projects/couvertures', 'public');
+            if ($request->hasFile('coverphoto')) {
+                $project->coverphoto = $request->file('coverphoto')->store('projects/couvertures', 'public');
             }
 
             if ($request->hasFile('logo')) {
                 $project->logo = $request->file('logo')->store('projects/logos', 'public');
             }
 
-            if ($request->hasFile('gallerie_images')) {
+            if ($request->hasFile('galleryimages')) {
                 $imgPaths = [];
-                foreach ($request->file('gallerie_images') as $img) {
+                foreach ($request->file('galleryimages') as $img) {
                     $imgPaths[] = $img->store('projects/images', 'public');
                 }
-                $project->gallerie_images = json_encode($imgPaths);
+                $project->galleryimages = json_encode($imgPaths);
             }
 
-            if ($request->hasFile('gallerie_videos')) {
+            if ($request->hasFile('galleryvideos')) {
                 $videoPaths = [];
-                foreach ($request->file('gallerie_videos') as $vid) {
+                foreach ($request->file('galleryvideos') as $vid) {
                     $videoPaths[] = $vid->store('projects/videos', 'public');
                 }
-                $project->gallerie_videos = json_encode($videoPaths);
+                $project->galleryvideos = json_encode($videoPaths);
             }
 
             // Update simple fields
@@ -360,18 +332,18 @@ public function get_projectById($id)
 public function getProjectByCity(Request $request)
 {
     try {
-        $ville_id = $request->ville_id;
+        $cityId = $request->cityId;
 
-        $projects = Project::join('region', 'projects.region_id', '=', 'region.id')
-            ->join('ville', 'region.ville_id', '=', 'ville.id')   
-            ->where('ville.id', $ville_id)
+        $projects = Project::join('region', 'projects.regionId', '=', 'region.id')
+            ->join('city', 'region.cityId', '=', 'city.id')   
+            ->where('city.id', $cityId)
             ->get();
 
         if ($projects->isEmpty()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'No projects found in this city.',
-                'city_id' => $ville_id
+                'city_id' => $cityId
             ], 404);
         }
 
@@ -382,18 +354,18 @@ public function getProjectByCity(Request $request)
                 'name' => $item->name,
                 'address' => $item->address,
                 'presentation' => $item->presentation,
-                'region_id' => $item->region_id,
-                'apartments_count' => $item->nb_appartements, // traduit
+                'regionId' => $item->regionId,
+                'apartments_count' => $item->numberOfAppartements, // traduit
                 'surface' => $item->surface,
                 'email' => $item->email,
-                'user_id' => $item->user_id,
-                'cover_photo' => $item->photo_couverture, // traduit
+                'userId' => $item->userId,
+                'cover_photo' => $item->coverphoto, // traduit
                 'logo' => $item->logo,
-                'gallery_images' => json_decode($item->gallerie_images, true), // traduit
-                'gallery_videos' => json_decode($item->gallerie_videos, true), // traduit
+                'gallery_images' => json_decode($item->galleryimages, true), // traduit
+                'gallery_videos' => json_decode($item->galleryvideos, true), // traduit
                 'created_at' => $item->created_at,
                 'updated_at' => $item->updated_at,
-                'city_name'=>$item->nom_ville,
+                'city_name'=>$item->city,
             ];
         });
 
@@ -414,9 +386,9 @@ public function getProjectByCity(Request $request)
 
     public function filterProjects(Request $request)
 {
-    if ($request->has('region_id')) {
+    if ($request->has('regionId')) {
         return $this->getProjectByRegion($request);
-    } elseif ($request->has('ville_id')) {
+    } elseif ($request->has('cityId')) {
         return $this->getProjectByCity($request);
     } else {
         return $this->display();

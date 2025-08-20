@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('caracteristique', function (Blueprint $table) {
+        Schema::create('Feature', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('opt_id');
+            $table->unsignedBigInteger('projectId');
+            $table->unsignedBigInteger('optionId');
             $table->timestamps();
-                        $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('opt_id')->references('id')->on('options')->onDelete('cascade');
+                        $table->foreign('projectId')->references('id')->on('projects')->onDelete('cascade');
+            $table->foreign('optionId')->references('id')->on('options')->onDelete('cascade');
 
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('caracteristique');
+        Schema::dropIfExists('Feature');
     }
 };
