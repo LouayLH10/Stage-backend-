@@ -18,7 +18,7 @@ class AppartementController extends Controller
             'apartments.*.surface' => 'required|numeric',
             'apartments.*.price' => 'required|numeric',
             'apartments.*.categoryId' => 'required|exists:category,id',
-            'apartments.*.plan' => 'nullable|file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:10240',
+            'apartments.*.plan' => 'nullable|file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:1000000',
             'apartments.*.view.*' => 'nullable|file|image|max:100000000',
             'projectId' => 'required|exists:projects,id',
         ]);
@@ -85,32 +85,14 @@ class AppartementController extends Controller
                 ->where('projectId', $id)
                 ->get();
 
-            if($appartements->isEmpty()){
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'No apartments found in this residence.',
-                ], 404);
-            }
+       
 
             // Transform collection keys to English
-            $result = $appartements->map(function($app) {
-                return [
-                    'floor' => $app->floor,
-                    'surface' => $app->surface,
-                    'price' => $app->price,
-                    'category_id' => $app->categoryId,
-                    'view' => $app->view,
-                    'plan' => $app->plan,
-                    'projectId' => $app->projectId,
-                    'category' => $app->Category,
-                    'project' => $app->projet,
-                ];
-            });
 
             return response()->json([
                 'status' => 'success',
                 'message' => 'Apartments retrieved successfully.',
-                'appartments' => $result
+                'appartments' => $appartements  
             ], 200);
 
         } catch (\Exception $e) {
@@ -121,4 +103,42 @@ class AppartementController extends Controller
             ], 500);
         }
     }
+public function deleteAppartement($apartmentId)
+{
+    try {
+        // ✅ Vérifier que l'appartement existe
+        $appartement = Appartement::findOrFail($apartmentId);
+
+        // 📦 Supprimer les fichiers associés
+        // Supprimer le plan
+        if ($appartement->plan) {
+            Storage::disk('public')->delete($appartement->plan);
+        }
+
+        // Supprimer les vues
+        if ($appartement->view) {
+            $viewPaths = json_decode($appartement->view, true);
+            if (is_array($viewPaths)) {
+                foreach ($viewPaths as $viewPath) {
+                    Storage::disk('public')->delete($viewPath);
+                }
+            }
+        }
+
+        // 🗑️ Supprimer l'appartement de la base de données
+        $appartement->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appartement deleted successfully'
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Server error',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

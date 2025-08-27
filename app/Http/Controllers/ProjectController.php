@@ -9,84 +9,119 @@ use App\Models\Project;
 
 class ProjectController extends Controller
 {
-    public function store(Request $request)
-    {
-        try {
-            // ✅ Validation
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string',
-                'address' => 'required|string',
-                'presentation' => 'required|string',
-                'regionId' => 'required|exists:region,id',
-                'numberOfAppartements' => 'required|integer',
-                'surface' => 'required|numeric',
-                'email' => 'required|email',
-                'userId' => 'required|exists:users,id',
-                'typeId' => 'required|exists:type,id',
-                'coverphoto' => 'required|image|mimes:jpg,jpeg,png|max:10000000',
-                'logo' => 'required|file|image|max:2048',
+public function store(Request $request)
+{
+    try {
+        // ✅ Validation
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string',
+            'address' => 'required|string',
+            'presentation' => 'required|string',
+            'regionId' => 'required|exists:region,id',
+            'numberOfAppartements' => 'required|integer',
+            'surface' => 'required|numeric',
+            'email' => 'required|email',
+            'userId' => 'required|exists:users,id',
+            'typeId' => 'required|exists:type,id',
+            'coverphoto' => 'required|image|mimes:jpg,jpeg,png|max:10000',
+            'logo' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'galleryimages.*' => 'nullable|image|mimes:jpg,jpeg,png|max:10000',
+            'galleryvideos.*' => 'nullable|mimetypes:video/mp4,video/avi,video/mov|max:2000000',
+        ]);
 
-                'galleryimages.*' => 'file|image|max:100000000',
-                'galleryvideos.*' => 'file|mimetypes:video/mp4,video/avi,video/mov|max:10000000',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // 📦 Upload files
-            $photoCouverturePath = $request->file('coverphoto')->store('projects/couvertures', 'public');
-            $logoPath = $request->file('logo')->store('projects/logos', 'public');
-
-            $galleryImagesPaths = [];
-            if ($request->hasFile('galleryimages')) {
-                foreach ($request->file('galleryimages') as $img) {
-                    $galleryImagesPaths[] = $img->store('projects/images', 'public');
-                }
-            }
-
-            $galleryVideosPaths = [];
-            if ($request->hasFile('galleryvideos')) {
-                foreach ($request->file('galleryvideos') as $video) {
-                    $galleryVideosPaths[] = $video->store('projects/videos', 'public');
-                }
-            }
-
-            // 🧱 Create project
-            $project = Project::create([
-                'name' => $request->name,
-                'address' => $request->address,
-                'presentation' => $request->presentation,
-                'regionId' => $request->regionId,
-                'numberOfAppartements' => $request->numberOfAppartements,
-                'surface' => $request->surface,
-                'email' => $request->email,
-                'userId' => $request->userId,
-                'coverphoto' => $photoCouverturePath,
-                'logo' => $logoPath,
-                'typeId' => $request->typeId,
-                'galleryimages' => json_encode($galleryImagesPaths),
-                'galleryvideos' => json_encode($galleryVideosPaths),
-            ]);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Project successfully added',
-                'project' => $project
-            ], 201);
-
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Server error',
-                'error' => $e->getMessage()
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Vérifier que les dossiers de stockage existent
+        $directories = ['projects/couvertures', 'projects/logos', 'projects/images', 'projects/videos'];
+        foreach ($directories as $directory) {
+            $path = storage_path('app/public/' . $directory);
+            if (!file_exists($path)) {
+                mkdir($path, 0755, true);
+            }
+        }
+
+        // 📦 Upload files avec vérification des erreurs
+        $photoCouverturePath = $request->file('coverphoto')->store('projects/couvertures', 'public');
+        if ($photoCouverturePath === false) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to upload cover photo'
             ], 500);
         }
+
+        $logoPath = $request->file('logo')->store('projects/logos', 'public');
+        if ($logoPath === false) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to upload logo'
+            ], 500);
+        }
+
+        $galleryImagesPaths = [];
+        if ($request->hasFile('galleryimages')) {
+            foreach ($request->file('galleryimages') as $img) {
+                $path = $img->store('projects/images', 'public');
+                if ($path === false) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Failed to upload gallery image'
+                    ], 500);
+                }
+                $galleryImagesPaths[] = $path;
+            }
+        }
+
+        $galleryVideosPaths = [];
+        if ($request->hasFile('galleryvideos')) {
+            foreach ($request->file('galleryvideos') as $video) {
+                $path = $video->store('projects/videos', 'public');
+                if ($path === false) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Failed to upload gallery video'
+                    ], 500);
+                }
+                $galleryVideosPaths[] = $path;
+            }
+        }
+
+        // 🧱 Create project
+        $project = Project::create([
+            'name' => $request->name,
+            'address' => $request->address,
+            'presentation' => $request->presentation,
+            'regionId' => $request->regionId,
+            'numberOfAppartements' => $request->numberOfAppartements,
+            'surface' => $request->surface,
+            'email' => $request->email,
+            'userId' => $request->userId,
+            'coverphoto' => $photoCouverturePath,
+            'logo' => $logoPath,
+            'typeId' => $request->typeId,
+            'galleryimages' => !empty($galleryImagesPaths) ? json_encode($galleryImagesPaths) : null,
+            'galleryvideos' => !empty($galleryVideosPaths) ? json_encode($galleryVideosPaths) : null,
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Project successfully added',
+            'project' => $project
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Server error',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 
 public function display()
 {
@@ -124,25 +159,7 @@ public function get_projectById($id)
         }
 
         // On utilise $item dans la closure, pas $project
-        $project = collect([$project])->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'name' => $item->name,
-                'address' => $item->address,
-                'presentation' => $item->presentation,
-                'regionId' => $item->regionId,
-                'apartments_count' => $item->numberOfAppartements, // traduit
-                'surface' => $item->surface,
-                'email' => $item->email,
-                'userId' => $item->userId,
-                'cover_photo' => $item->coverphoto, // traduit
-                'logo' => $item->logo,
-                'gallery_images' => json_decode($item->galleryimages, true), // traduit
-                'gallery_videos' => json_decode($item->galleryvideos, true), // traduit
-                'created_at' => $item->created_at,
-                'updated_at' => $item->updated_at,
-            ];
-        });
+      
 
         return response()->json([
             'status' => 'success',
@@ -221,86 +238,114 @@ public function get_projectById($id)
         }
     }
 
-    public function update(Request $request, $id)
-    {
-        try {
-            $project = Project::find($id);
+public function update(Request $request, $id)
+{
+    try {
+        $project = Project::find($id);
 
-            if (!$project) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Project not found',
-                ], 404);
-            }
-
-            $validator = Validator::make($request->all(), [
-                'name' => 'sometimes|required|string',
-                'address' => 'sometimes|required|string',
-                'presentation' => 'sometimes|required|string',
-                'regionId' => 'sometimes|required|exists:region,id',
-                'numberOfAppartements' => 'sometimes|required|integer',
-                'surface' => 'sometimes|required|numeric',
-                'email' => 'sometimes|required|email',
-                'userId' => 'sometimes|required|exists:users,id',
-
-                'coverphoto' => 'nullable|file|image|max:2048',
-                'logo' => 'nullable|file|image|max:2048',
-                'galleryimages.*' => 'nullable|file|image|max:2048',
-                'galleryvideos.*' => 'nullable|file|mimetypes:video/mp4,video/avi,video/mov|max:51200',
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-
-            // Update files
-            if ($request->hasFile('coverphoto')) {
-                $project->coverphoto = $request->file('coverphoto')->store('projects/couvertures', 'public');
-            }
-
-            if ($request->hasFile('logo')) {
-                $project->logo = $request->file('logo')->store('projects/logos', 'public');
-            }
-
-            if ($request->hasFile('galleryimages')) {
-                $imgPaths = [];
-                foreach ($request->file('galleryimages') as $img) {
-                    $imgPaths[] = $img->store('projects/images', 'public');
-                }
-                $project->galleryimages = json_encode($imgPaths);
-            }
-
-            if ($request->hasFile('galleryvideos')) {
-                $videoPaths = [];
-                foreach ($request->file('galleryvideos') as $vid) {
-                    $videoPaths[] = $vid->store('projects/videos', 'public');
-                }
-                $project->galleryvideos = json_encode($videoPaths);
-            }
-
-            // Update simple fields
-            $project->fill($request->only($project->getFillable()));
-            $project->save();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Project successfully updated',
-                'project' => $project
-            ], 200);
-
-        } catch (\Exception $e) {
+        if (!$project) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error updating project',
-                'error' => $e->getMessage()
-            ], 500);
+                'message' => 'Project not found',
+            ], 404);
         }
-    }
 
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string',
+            'address' => 'sometimes|required|string',
+            'presentation' => 'sometimes|required|string',
+            'regionId' => 'sometimes|required|exists:region,id',
+            'numberOfAppartements' => 'sometimes|required|integer',
+            'surface' => 'sometimes|required|numeric',
+            'email' => 'sometimes|required|email',
+            'userId' => 'sometimes|required|exists:users,id',
+
+            'coverphoto' => 'nullable|file|image|max:2048',
+            'logo' => 'nullable|file|image|max:2048',
+            'galleryimages.*' => 'nullable|file|image|max:2048',
+            'galleryvideos.*' => 'nullable|file|mimetypes:video/mp4,video/avi,video/mov|max:51200',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Mettre à jour les champs standards
+        $project->fill($request->only([
+            'name', 'address', 'presentation', 'regionId', 
+            'numberOfAppartements', 'surface', 'email', 'userId'
+        ]));
+
+        // Update files
+        if ($request->hasFile('coverphoto')) {
+            // Supprimer l'ancienne image si elle existe
+            if ($project->coverphoto) {
+                Storage::disk('public')->delete($project->coverphoto);
+            }
+            $project->coverphoto = $request->file('coverphoto')->store('projects/couvertures', 'public');
+        }
+
+        if ($request->hasFile('logo')) {
+            // Supprimer l'ancien logo s'il existe
+            if ($project->logo) {
+                Storage::disk('public')->delete($project->logo);
+            }
+            $project->logo = $request->file('logo')->store('projects/logos', 'public');
+        }
+
+        if ($request->hasFile('galleryimages')) {
+            // Supprimer les anciennes images si elles existent
+            if ($project->galleryimages) {
+                $oldImages = json_decode($project->galleryimages, true);
+                foreach ($oldImages as $oldImage) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            }
+            
+            $imgPaths = [];
+            foreach ($request->file('galleryimages') as $img) {
+                $imgPaths[] = $img->store('projects/images', 'public');
+            }
+            $project->galleryimages = json_encode($imgPaths);
+        }
+
+        if ($request->hasFile('galleryvideos')) {
+            // Supprimer les anciennes vidéos si elles existent
+            if ($project->galleryvideos) {
+                $oldVideos = json_decode($project->galleryvideos, true);
+                foreach ($oldVideos as $oldVideo) {
+                    Storage::disk('public')->delete($oldVideo);
+                }
+            }
+            
+            $videoPaths = [];
+            foreach ($request->file('galleryvideos') as $vid) {
+                $videoPaths[] = $vid->store('projects/videos', 'public');
+            }
+            $project->galleryvideos = json_encode($videoPaths);
+        }
+
+        // Sauvegarder toutes les modifications
+        $project->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Project successfully updated',
+            'project' => $project
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Error updating project',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
     public function destroy($id)
     {
         try {

@@ -17,7 +17,7 @@ use  App\Http\Controllers\RegionController;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
-Route::put('/projects/{id}', [ProjectController::class, 'update']);
+Route::post('/projects/{id}', [ProjectController::class, 'update']);
 Route::delete('/projects/{id}', [ProjectController::class, 'destroy']);
 
 
@@ -28,11 +28,16 @@ Route::post('/projects', [ProjectController::class, 'store']);
 Route::post('/options', [OptionController::class, 'addOptions']);
 Route::get('/options', [OptionController::class, 'showOption']);
 Route::post('/features',[FeaturesController::class,'addFeature']);
+Route::get('/features/{id}',[FeaturesController::class,'getFeatures']);
+Route::delete('/features/{featureId}', [FeaturesController::class, 'deletefeature']);
+
 Route::get('/projects/{id}', [ProjectController::class, 'get_projectById']);
 Route::get('/projects', [ProjectController::class, 'filterProjects']);
 Route::get('/types', [TypeController::class, 'get_types']);
 Route::post('/types', [TypeController::class, 'add_type']);
 Route::get('/appartements/{id}',[AppartementController::class,'getAppartmentbyProject']);
+Route::delete('/appartements/{id}',[AppartementController::class,'deleteAppartement']);
+
 Route::get('/google-profile', [GoogleController::class, 'getProfile']);
 Route::post('/appartements',[AppartementController::class,'addappartement']);
 Route::post('/categories',[CategoryController::class,'addCat']);

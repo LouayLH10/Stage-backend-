@@ -7,6 +7,6 @@ RUN apt-get update && apt-get install -y \
 
 # Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
+COPY ./docker/php/php.ini $PHP_INI_DIR/php.ini
 # Dossier de travail
 WORKDIR /var/www

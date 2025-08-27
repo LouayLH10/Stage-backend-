@@ -90,8 +90,8 @@ class FeaturesController extends Controller
             ], 500);
         }
     }
-    public function getFeatures($projectId)
-{
+    public function getFeatures($id)
+{ $projectId=$id;
     try {
    
         $validator = Validator::make(
@@ -116,6 +116,30 @@ class FeaturesController extends Controller
             'status' => 'success',
             'count'  => $Features->count(),
             'data'   => $Features
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Server error',
+            'error'   => $e->getMessage()
+        ], 500);
+    }
+}
+public function deleteFeature(Request $request, $featureId)
+{
+    try {
+        // Validation de l'ID de la feature
+   
+
+        // Recherche et suppression de la feature spécifique
+        $feature = Feature::findOrFail($featureId);
+        $feature->delete();
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Feature deleted successfully',
+            'data'    => ['id' => $featureId]
         ], 200);
 
     } catch (\Exception $e) {
