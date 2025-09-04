@@ -1,37 +1,30 @@
 FROM php:8.2-fpm
 
-# Dépendances système
+# Installer dépendances système
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip nano libzip-dev libpng-dev libjpeg-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl \
+    git unzip curl libpq-dev libonig-dev libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl \
     && rm -rf /var/lib/apt/lists/*
-
-# Créer un utilisateur non-root 'www'
-RUN useradd -G www-data,root -d /var/www www && \
-    chown -R www:www /var/www
-
-# Passer sur cet utilisateur
-USER www
-WORKDIR /var/www
 
 # Copier php.ini
 COPY ./docker/php/php.ini $PHP_INI_DIR/php.ini
 
-# Copier Composer depuis l'image officielle
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Installer Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Définir le cache Composer dans /tmp pour éviter open_basedir
-ENV COMPOSER_CACHE_DIR=/tmp/composer
+# Créer utilisateur non-root et dossiers Laravel
+RUN useradd -G www-data,root -u 1000 -d /var/www laraveluser \
+    && mkdir -p /var/www/storage /var/www/bootstrap/cache /var/www/vendor \
+    && chown -R laraveluser:www-data /var/www \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/vendor
 
-# Installer les dépendances Composer si composer.json existe
-COPY --chown=www:www composer.json composer.lock ./
-RUN composer install --no-interaction --optimize-autoloader || true
+WORKDIR /var/www
+USER laraveluser
 
-# Lancer storage:link automatiquement si le dossier storage existe
-RUN if [ -d storage ]; then php artisan storage:link || true; fi
+# Copier le projet
+COPY --chown=laraveluser:www-data . /var/www
 
-# Exposer le port PHP-FPM
+# Expose PHP-FPM port
 EXPOSE 9000
 
-# Commande par défaut
 CMD ["php-fpm"]
