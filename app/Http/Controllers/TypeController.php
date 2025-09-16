@@ -32,4 +32,21 @@ class TypeController extends Controller
             'data' => $types
         ], 200);
     }
+     public function delete_type($id)
+    {
+        try {
+            $type = Type::findOrFail($id);
+            $type->delete();
+
+            return response()->json([
+                'message' => 'Type deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error deleting type',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

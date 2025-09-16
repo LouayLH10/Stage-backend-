@@ -87,4 +87,36 @@ class OptionController extends Controller
             ], 500);
         }
     }
+     public function deleteOption($id)
+    {
+        try {
+            $option = Option::find($id);
+
+            if (!$option) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Option not found'
+                ], 404);
+            }
+
+            // Supprimer l’icône du stockage sauf si c’est l’icône par défaut
+            if ($option->icon !== 'options/default_icons/default_icon.png' && Storage::disk('public')->exists($option->icon)) {
+                Storage::disk('public')->delete($option->icon);
+            }
+
+            $option->delete();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Option deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Error deleting option',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
 }

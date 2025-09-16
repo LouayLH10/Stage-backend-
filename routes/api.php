@@ -13,6 +13,7 @@ use  App\Http\Controllers\CityController;
 use  App\Http\Controllers\UserController;
 use  App\Http\Controllers\TypeController;
 use  App\Http\Controllers\RegionController;
+use App\Http\Controllers\PostController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
@@ -40,11 +41,21 @@ Route::delete('/appartements/{id}',[AppartementController::class,'deleteAppartem
 
 Route::get('/google-profile', [GoogleController::class, 'getProfile']);
 Route::post('/appartements',[AppartementController::class,'addappartement']);
+Route::get('/appartement/{id}',[AppartementController::class,'getAppartmentbyid']);
+
+Route::get('/publish-appartement/{id}', [PostController::class, 'publierAppartement']);
+
 Route::post('/categories',[CategoryController::class,'addCat']);
 Route::get('/cities',[CityController::class,'getCities']);
 Route::post('/cities',[CityController::class,'addCity']);
 Route::post('/regions',[RegionController::class,'add_region']);
 Route::get('/regions/{id}',[RegionController::class,'display']);
+Route::delete('/options/{id}', [OptionController::class, 'deleteOption']);
+Route::delete('/categories/{id}', [CategoryController::class, 'deleteCat']);
+Route::delete('/types/{id}', [TypeController::class, 'delete_type']); 
+// Dans routes/web.php
+Route::get('/appartement/{id}/statut', [PostController::class, 'verifierStatut']);
+Route::post('/appartements/{id}', [AppartementController::class, 'updateAppartement']);
 
 // ✅ Toutes les routes protégées par Sanctum
 Route::middleware('auth:sanctum')->group(function () {

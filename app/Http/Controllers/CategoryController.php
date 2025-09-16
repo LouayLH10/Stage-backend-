@@ -8,41 +8,41 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
-    public function addCat(Request $request)
-    {
-        try {
-            // ✅ Validation
-            $validator = Validator::make($request->all(), [
-                'category' => 'required|string',
-            ]);
+   public function addCat(Request $request)
+{
+    try {
+        // ✅ Validation
+        $validator = Validator::make($request->all(), [
+            'category' => 'required|string',
+        ]);
 
-            if ($validator->fails()) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Validation failed',
-                    'errors'  => $validator->errors()
-                ], 422);
-            }
-
-            // ✅ Create category
-            $Category= Category::create([
-                'category' => $request->category,
-            ]);
-
-            return response()->json([
-                'status'    => 'success',
-                'message'   => 'Category added successfully',
-                'category' => $category
-            ], 201);
-
-        } catch (\Exception $e) {
+        if ($validator->fails()) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Server error',
-                'error'   => $e->getMessage()
-            ], 500);
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors()
+            ], 422);
         }
+
+        // ✅ Create category
+        $category = Category::create([
+            'category' => $request->category,
+        ]);
+
+        return response()->json([
+            'status'    => 'success',
+            'message'   => 'Category added successfully',
+            'category'  => $category
+        ], 201);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Server error',
+            'error'   => $e->getMessage()
+        ], 500);
     }
+}
 
     public function getCat()
     {
@@ -59,6 +59,32 @@ class CategoryController extends Controller
             return response()->json([
                 'status'  => 'error',
                 'message' => 'Error retrieving categories',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+       public function deleteCat($id)
+    {
+        try {
+            $category = Category::find($id);
+            if (!$category) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Category not found'
+                ], 404);
+            }
+
+            $category->delete();
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Category deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Server error',
                 'error'   => $e->getMessage()
             ], 500);
         }

@@ -141,4 +141,79 @@ public function deleteAppartement($apartmentId)
         ], 500);
     }
 }
+public function updateAppartement(Request $request, $apartmentId)
+{
+    try {
+        // ✅ Validation
+        $validator = Validator::make($request->all(), [
+            'floor' => 'required|integer',
+            'surface' => 'required|numeric',
+            'price' => 'required|numeric',
+            'categoryId' => 'required|exists:category,id',
+            'plan.*' => 'nullable|file|mimetypes:application/pdf,image/jpeg,image/png,image/jpg|max:1000000',
+            'view.*' => 'nullable|file|image|max:100000000',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // ✅ Récupérer l'appartement
+        $appartement = Appartement::findOrFail($apartmentId);
+
+        // 📦 Gestion du plan
+        if ($request->hasFile('plan')) {
+            // Supprimer l'ancien plan
+            if ($appartement->plan) {
+                Storage::disk('public')->delete($appartement->plan);
+            }
+            $appartement->plan = $request->plan->store('appartements/plans', 'public');
+        }
+
+        // 📦 Gestion des vues
+        if ($request->hasFile('view')) {
+            // Supprimer les anciennes vues
+            if ($appartement->view) {
+                $oldViews = json_decode($appartement->view, true);
+                if (is_array($oldViews)) {
+                    foreach ($oldViews as $viewPath) {
+                        Storage::disk('public')->delete($viewPath);
+                    }
+                }
+            }
+
+            $newViews = [];
+            foreach ($request->file('view') as $img) {
+                $newViews[] = $img->store('projects/vues', 'public');
+            }
+            $appartement->view = json_encode($newViews);
+        }
+
+        // 🧱 Mise à jour des autres champs
+        $appartement->floor = $request->floor;
+        $appartement->surface = $request->surface;
+        $appartement->price = $request->price;
+        $appartement->categoryId = $request->categoryId;
+
+        $appartement->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Appartement updated successfully',
+            'apartment' => $appartement
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Server error',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }
