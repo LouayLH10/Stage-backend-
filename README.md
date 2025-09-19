@@ -48,4 +48,4 @@ We would like to extend our thanks to the following sponsors for funding Laravel
 
 Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 ## My Project
-My project is the backend for mobile application for real estate agency it for publication of residences in Tunisia .
+My project is a backend system for a mobile application designed for a real estate agency. It enables the publication and management of property listings in Tunisia. The platform integrates artificial intelligence to automatically generate engaging Facebook posts for each residence, helping agencies save time, reach more potential clients, and improve their digital marketing.
