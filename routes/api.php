@@ -31,6 +31,7 @@ Route::get('/options', [OptionController::class, 'showOption']);
 Route::post('/features',[FeaturesController::class,'addFeature']);
 Route::get('/features/{id}',[FeaturesController::class,'getFeatures']);
 Route::delete('/features/{featureId}', [FeaturesController::class, 'deletefeature']);
+Route::get('/generate-facebook-post/{id}', [PostController::class, 'generateFacebookPost']);
 
 Route::get('/projects/{id}', [ProjectController::class, 'get_projectById']);
 Route::get('/projects', [ProjectController::class, 'filterProjects']);
@@ -43,7 +44,6 @@ Route::get('/google-profile', [GoogleController::class, 'getProfile']);
 Route::post('/appartements',[AppartementController::class,'addappartement']);
 Route::get('/appartement/{id}',[AppartementController::class,'getAppartmentbyid']);
 
-Route::get('/publish-appartement/{id}', [PostController::class, 'publierAppartement']);
 
 Route::post('/categories',[CategoryController::class,'addCat']);
 Route::get('/cities',[CityController::class,'getCities']);
@@ -54,7 +54,6 @@ Route::delete('/options/{id}', [OptionController::class, 'deleteOption']);
 Route::delete('/categories/{id}', [CategoryController::class, 'deleteCat']);
 Route::delete('/types/{id}', [TypeController::class, 'delete_type']); 
 // Dans routes/web.php
-Route::get('/appartement/{id}/statut', [PostController::class, 'verifierStatut']);
 Route::post('/appartements/{id}', [AppartementController::class, 'updateAppartement']);
 
 // ✅ Toutes les routes protégées par Sanctum

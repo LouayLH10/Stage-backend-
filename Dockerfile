@@ -11,7 +11,8 @@ COPY ./docker/php/php.ini $PHP_INI_DIR/php.ini
 
 # Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
+COPY cacert.pem /usr/local/share/ca-certificates/cacert.pem
+RUN update-ca-certificates
 # Créer utilisateur non-root laraveluser
 RUN useradd -ms /bin/bash -G www-data,root -u 1000 laraveluser \
     && mkdir -p /var/www/storage /var/www/bootstrap/cache /var/www/vendor \

@@ -149,7 +149,7 @@ public function display()
 public function get_projectById($id)
 {
     try {
-        $project = Project::with('user', 'region', 'Features.option','type')->find($id);
+        $project = Project::with('user', 'region.city', 'Features.option','type')->find($id);
 
         if (!$project) {
             return response()->json([
